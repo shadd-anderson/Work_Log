@@ -7,6 +7,7 @@ DATE_FORMAT = "%m/%d/%y"
 
 
 class Entry:
+    """ Entry class, contains work done (or title), date done, time taken, and any user comments """
     work_done = ""
     date = None
     time = None
@@ -26,34 +27,26 @@ class Entry:
 
 
 def cls():
+    """ Clears the screen """
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def verify_int(prompt):
+    """ Verifies input as an integer """
     success = False
     while not success:
         try:
             result = int(input(prompt))
         except ValueError:
-            print("Please enter the number of your choice...")
+            print("Please enter a valid integer...")
         else:
             success = True
 
     return result
 
 
-# TODO: Update with all (or most common) possible formats
-def user_friendly_date(date_format):
-    friendly_date = date_format
-    friendly_date = friendly_date.replace("%d", "DD")
-    friendly_date = friendly_date.replace("%m", "MM")
-    friendly_date = friendly_date.replace("%y", "YY")
-    friendly_date = friendly_date.replace("%Y", "YYYY")
-
-    return friendly_date
-
-
 def verify_date(prompt, date_format):
+    """ Verifies input as a date with a specified format """
     success = False
     while not success:
         try:
@@ -66,15 +59,29 @@ def verify_date(prompt, date_format):
     return result
 
 
+# TODO: Update with all (or most common) possible formats
+def user_friendly_date(date_format):
+    """ Takes a python date format and converts it to a more user-friendly string """
+    friendly_date = date_format
+    friendly_date = friendly_date.replace("%d", "DD")
+    friendly_date = friendly_date.replace("%m", "MM")
+    friendly_date = friendly_date.replace("%y", "YY")
+    friendly_date = friendly_date.replace("%Y", "YYYY")
+
+    return friendly_date
+
+
 def input_new_entry():
+    """ Prompts and creates for new entry """
     work_done = input("Please enter the work done: ")
     date = verify_date("Please enter the date {} took place (MM/DD/YY): ".format(work_done), DATE_FORMAT)
-    time = input("Please enter the time in minutes that {} took: ".format(work_done))
+    time = verify_int("Please enter the time in minutes that {} took: ".format(work_done))
     comments = input("Please enter any extra comments (optional): ")
     return Entry(work_done, date, time, comments)
 
 
 def search_by_date(some_entries, search_date):
+    """ Searches for entry by specified date """
     entries_by_date = []
     for entry in some_entries:
         if entry.date == search_date:
@@ -84,6 +91,7 @@ def search_by_date(some_entries, search_date):
 
 
 def edit_entry(an_entry):
+    """ Prompts user for specific aspects of entry to edit and edits entry """
     current_data = "Current: {}"
     new_data_prompt = "What would you like to change {} to? "
     success = "{} updated!"
@@ -128,10 +136,12 @@ def edit_entry(an_entry):
 
 
 def enter():
+    """ Allows for break before moving on """
     input("Please press enter to continue")
 
 
 def search_entries(some_entries):
+    """ Menu for entry searching """
     search_menu = {1: "date",
                    2: "date range",
                    3: "time spent",
@@ -165,7 +175,7 @@ def search_entries(some_entries):
             date_2 = verify_date("Please enter the end of your desired date range: ", DATE_FORMAT)
             results = []
             for entry in some_entries:
-                if date_2 > entry.date > date_1:
+                if date_2 >= entry.date >= date_1:
                     results.append(entry)
 
             page_entries(results, some_entries)
@@ -192,11 +202,19 @@ def search_entries(some_entries):
 
         elif search_type == 5:
             choosing = False
-            regex = input("Please enter the regex pattern you would like to search by: ")
+            proper_regex = False
             results = []
-            for entry in some_entries:
-                if re.search(regex, entry.work_done) or re.search(regex, entry.comments):
-                    results.append(entry)
+            while not proper_regex:
+                regex = input("Please enter the regex pattern you would like to search by: ")
+                results = []
+                try:
+                    for entry in some_entries:
+                        if re.search(regex, entry.work_done) or re.search(regex, entry.comments):
+                            results.append(entry)
+                except re.error:
+                    print("Improper regex. Please check your regex and try again.")
+                else:
+                    proper_regex = True
 
             page_entries(results, some_entries)
 
@@ -208,6 +226,7 @@ def search_entries(some_entries):
 
 
 def page_entries(results, some_entries):
+    """ Pages through an array of entries. Results is a search query and some_entries is the master list """
     entry_index = 0
     loop = True
     while loop:
@@ -254,6 +273,7 @@ def page_entries(results, some_entries):
 
 
 def main():
+    """ Main menu """
     menu = {1: "Add entry", 2: "Search entries", 3: "Quit"}
     online = True
     entries = []
